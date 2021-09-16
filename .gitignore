@@ -4,3 +4,4 @@ fma_spectrograms/
 fma_metadata/
 __pycache__/
 models/
+tmp/
