@@ -1,10 +1,10 @@
-import tensorflow as tf
 from tensorflow import keras
 import numpy as np
 
+
 class ConsecutiveEarlyStopping(keras.callbacks.Callback):
     """Stop training when 'patience' epochs are consecutively worse
-    
+
     Arguments:
         patience: Number of epochs to wait after which we will terminate
     """
@@ -19,14 +19,14 @@ class ConsecutiveEarlyStopping(keras.callbacks.Callback):
         self.count = 0
         self.prev = None
         self.model_path = model_path
-        self.save_steps=save_steps
+        self.save_steps = save_steps
 
     def on_epoch_end(self, epoch, logs=None):
         current = logs.get(self.monitor)
         better = False
         if self.save_steps == True:
             self.model.save(self.model_path)
-        
+
         if self.prev == None:
             better = True
         elif self.mode == 'min':
@@ -46,5 +46,3 @@ class ConsecutiveEarlyStopping(keras.callbacks.Callback):
                 self.model.stop_training = True
                 if self.restore_best_weights:
                     self.model.set_weights(self.best_weights)
-            
-

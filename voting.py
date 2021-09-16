@@ -5,10 +5,8 @@ from os import listdir
 from keras.preprocessing.image import load_img, img_to_array
 import numpy
 from numpy import argmax
-from base_classif import pre_process
 from joblib import load, dump
 from numpy import tensordot
-from numpy import array
 from sklearn.metrics import accuracy_score
 from numpy.linalg import norm
 from scipy.optimize import differential_evolution, minimize
@@ -16,11 +14,8 @@ from scipy.optimize import minimize
 import numpy as np
 from joblib import dump
 from extractVoting import extractVoting, votingSummary
-from scipy.stats import t
-from statistics import mean, variance
-from math import sqrt
 from votingConfig import optimizationMethods
-import scipy
+
 
 def plurarity(x):
     ones = []
@@ -34,6 +29,7 @@ def plurarity(x):
         ones.append(model_res)
     return np.array(ones)
 
+
 def kApproval(x):
     ones = []
     for model in x:
@@ -44,15 +40,17 @@ def kApproval(x):
             result[sample.argsort()[-2]] = 2
             result[sample.argsort()[-3]] = 1
             sample = result
-            model_res.append(sample)            
+            model_res.append(sample)
         ones.append(model_res)
     return np.array(ones)
 
+
 def normalize(weights):
-	result = norm(weights, 1)
-	if result == 0.0:
-		return weights
-	return weights / result
+    result = norm(weights, 1)
+    if result == 0.0:
+        return weights
+    return weights / result
+
 
 def keras_predict(model, split):
     result = {}
@@ -62,7 +60,8 @@ def keras_predict(model, split):
             genre = 'Old-Time - Historic'
         for file in listdir(spec_path + split + '/' + genre + '/'):
             file = spec_path + split + '/' + genre + '/' + file
-            img = load_img(file, color_mode='grayscale', target_size=(128, 259))
+            img = load_img(file, color_mode='grayscale',
+                           target_size=(128, 259))
             input_arr = img_to_array(img)
             input_arr /= 255.
             input_arr = numpy.array([input_arr])
@@ -77,30 +76,36 @@ def keras_predict(model, split):
 
     return output
 
+
 def sklearn_predict(model, split):
     res = {}
     for id in split:
-        val = model.predict([features.loc[id, list(features.columns.levels[0])].to_numpy()])[0]
+        val = model.predict(
+            [features.loc[id, list(features.columns.levels[0])].to_numpy()])[0]
         res[id] = [0]*len(genres)
         res[id][val] = 1
     return res
 
-#Borda
+# Borda
+
+
 def evaluate_weights_Borda(weights, yhats, y):
     yhats = np.array(yhats)
 
     n_weights = normalize(weights)
-    summed = tensordot(yhats, n_weights, axes=((0),(0)))
+    summed = tensordot(yhats, n_weights, axes=((0), (0)))
 
     yhat = argmax(summed, axis=1)
     return 1 - accuracy_score(y, yhat)
 
-#Plurarity
+# Plurarity
+
+
 def evaluate_weights_Plurarity(weights, yhats, y):
     n_weights = normalize(weights)
     yhats = np.array(yhats)
     yhats = plurarity(yhats)
-    summed = tensordot(yhats, n_weights, axes=((0),(0)))
+    summed = tensordot(yhats, n_weights, axes=((0), (0)))
 
     yhat = argmax(summed, axis=1)
     return 1 - accuracy_score(y, yhat)
@@ -110,10 +115,11 @@ def evaluate_weights_kApproval(weights, yhats, y):
     n_weights = normalize(weights)
     yhats = np.array(yhats)
     yhats = kApproval(yhats)
-    summed = tensordot(yhats, n_weights, axes=((0),(0)))
+    summed = tensordot(yhats, n_weights, axes=((0), (0)))
 
     yhat = argmax(summed, axis=1)
     return 1 - accuracy_score(y, yhat)
+
 
 def prepare_data(keras_models, sklearn_models, split_set, split_name):
     labels = tracks['track', 'genre_top']
@@ -160,10 +166,12 @@ def main(evaluate_weights, method):
         outputs_test = load('./votingVars/predictions_test.joblib')
         real_outputs_test = load('./votingVars/labels_test.joblib')
     except:
-        outputs, real_outputs = prepare_data(keras_models, sklearn_models, val, 'validation')
+        outputs, real_outputs = prepare_data(
+            keras_models, sklearn_models, val, 'validation')
         dump(outputs, './votingVars/predictions_val.joblib')
         dump(real_outputs, './votingVars/labels_val.joblib')
-        outputs_test, real_outputs_test = prepare_data(keras_models, sklearn_models, test, 'test')
+        outputs_test, real_outputs_test = prepare_data(
+            keras_models, sklearn_models, test, 'test')
         dump(outputs_test, './votingVars/predictions_test.joblib')
         dump(real_outputs_test, './votingVars/labels_test.joblib')
 
@@ -175,7 +183,6 @@ def main(evaluate_weights, method):
         combinations += [temp + [output] for temp in combinations]
         index_combinations += [temp + [index] for temp in index_combinations]
     result = 1.
-
 
     i = 0
 
@@ -191,7 +198,8 @@ def main(evaluate_weights, method):
             continue
         weights = [1/len(combination) for _ in range(len(combination))]
         loss = evaluate_weights(weights, combination, real_outputs)
-        testLoss = evaluate_weights(weights, [outputs_test[i] for i in index_combination], real_outputs_test)
+        testLoss = evaluate_weights(
+            weights, [outputs_test[i] for i in index_combination], real_outputs_test)
         performances.append((loss, index_combination, combination, testLoss))
     performances.sort(key=lambda tup: tup[0], reverse=False)
 
@@ -202,19 +210,23 @@ def main(evaluate_weights, method):
         count = 5
 
     for oldLoss, index_combination, combination, oldTestLoss in performances[:50]:
-        i+=1
-        bound_w = [(0.0, 1.0)  for _ in range(len(combination))]
+        i += 1
+        bound_w = [(0.0, 1.0) for _ in range(len(combination))]
         test_acc = 0
         weights = [0]*len(combination)
         loss = 0
         weights_j = [0]*len(combination)
         for k in range(count):
             if method == 'differential_evolution':
-                weights_j = differential_evolution(evaluate_weights, bounds=bound_w, args=(combination, real_outputs), maxiter=1000, tol=1e-7)['x']
+                weights_j = differential_evolution(evaluate_weights, bounds=bound_w, args=(
+                    combination, real_outputs), maxiter=1000, tol=1e-7)['x']
             else:
-                weights_j = minimize(evaluate_weights, args=(combination, real_outputs), bounds=bound_w, x0=[1/len(combination) for _ in range(len(combination))], method=method)['x']
+                weights_j = minimize(evaluate_weights, args=(combination, real_outputs), bounds=bound_w, x0=[
+                                     1/len(combination) for _ in range(len(combination))], method=method)['x']
             loss_j = evaluate_weights(weights_j, combination, real_outputs)
-            test_acc_j = 1-evaluate_weights(weights_j, [outputs_test[i] for i in index_combination], real_outputs_test)
+            test_acc_j = 1 - \
+                evaluate_weights(
+                    weights_j, [outputs_test[i] for i in index_combination], real_outputs_test)
             test_acc += test_acc_j
             loss += loss_j
         weights = weights_j
@@ -229,7 +241,7 @@ def main(evaluate_weights, method):
         print()
         results["".join(str(model) + " " for model in model_names)] = {
             "val_acc_1": (1-oldLoss)*100,
-            "val_acc_2": (1-loss/count)*100, 
+            "val_acc_2": (1-loss/count)*100,
             "test_acc_1": ((1-oldTestLoss)*100),
             "test_acc_2": (test_acc*100/count)
         }
@@ -238,7 +250,7 @@ def main(evaluate_weights, method):
             best_weights = weights
             best_combinations = index_combination
     return results
-    
+
 
 if __name__ == '__main__':
     # for method in optimizationMethods:
@@ -249,5 +261,5 @@ if __name__ == '__main__':
         # dump(res, "./votingVars/resPlura_"+method+".joblib")
         res = main(evaluate_weights_kApproval, method)
         dump(res, "./votingVars/resKAppr_"+method+".joblib")
-    # extractVoting()
-    # votingSummary()
+    extractVoting()
+    votingSummary()

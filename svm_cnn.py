@@ -3,9 +3,9 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.utils import shuffle
 from joblib import dump, load
-import os
 from sklearn.metrics import accuracy_score
 import numpy as np
+
 
 def svm_cnn():
     enc = LabelEncoder()
@@ -19,6 +19,7 @@ def svm_cnn():
     clf.fit(X_training, y_training)
     dump(clf, "./models/small/svm_cnn.joblib")
 
+
 def check_score():
     enc = LabelEncoder()
     X_test = pd.read_csv("./features/x_test.csv", index_col=0)
@@ -30,6 +31,7 @@ def check_score():
     y_test = np.ravel(y_test)
     score = accuracy_score(y_test, predictions)
     print(score)
+
 
 if __name__ == '__main__':
     svm_cnn()
