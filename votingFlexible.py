@@ -141,6 +141,6 @@ def main(method, n):
 if __name__ == '__main__':
     for method in optimizationMethods:
         res = main(method, 3)
-        dump(res, "./votingVars/resFlex_"+method+".joblib")
+        dump(res, "./votingVars/savedResults/resFlex_"+method+".joblib")
     extractVoting()
     votingSummary()

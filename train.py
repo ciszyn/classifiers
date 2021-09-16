@@ -1,9 +1,8 @@
-from ConsecutiveEarlyStopping import ConsecutiveEarlyStopping
+from tools.ConsecutiveEarlyStopping import ConsecutiveEarlyStopping
 from joblib import dump
 from variables import *
 import tensorflow as tf
 from keras.preprocessing.image import ImageDataGenerator
-from modelScripts.CNN import getModel
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -44,4 +43,5 @@ def train(model_name, getModel):
 
 
 if __name__ == "__main__":
-    train('cnn', getModel)
+    for name, getModel in classifiers_deep.items:
+        train(name, getModel)

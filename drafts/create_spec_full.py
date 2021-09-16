@@ -1,4 +1,4 @@
-import util
+from tools import util
 import librosa
 import librosa.display
 from variables import *

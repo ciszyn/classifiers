@@ -1,4 +1,4 @@
-from base_classif import pre_process
+from tools.preprocess import pre_process
 from sklearn.metrics import plot_confusion_matrix
 import matplotlib.pyplot as plt
 import pandas as pd

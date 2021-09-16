@@ -67,4 +67,5 @@ def evaluate(model_type):
 
 
 if __name__ == "__main__":
-    evaluate('crnn9')
+    for classifier in classifiers_deep:
+        evaluate(classifier)

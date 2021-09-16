@@ -253,13 +253,12 @@ def main(evaluate_weights, method):
 
 
 if __name__ == '__main__':
-    # for method in optimizationMethods:
-    for method in ["differential_evolution"]:
-        # res = main(evaluate_weights_Borda, method)
-        # dump(res, "./votingVars/resBords_"+method+".joblib")
-        # res = main(evaluate_weights_Plurarity, method)
-        # dump(res, "./votingVars/resPlura_"+method+".joblib")
+    for method in optimizationMethods:
+        res = main(evaluate_weights_Borda, method)
+        dump(res, "./votingVars/savedResults/resBords_"+method+".joblib")
+        res = main(evaluate_weights_Plurarity, method)
+        dump(res, "./votingVars/savedResults/resPlura_"+method+".joblib")
         res = main(evaluate_weights_kApproval, method)
-        dump(res, "./votingVars/resKAppr_"+method+".joblib")
+        dump(res, "./votingVars/savedResults/resKAppr_"+method+".joblib")
     extractVoting()
     votingSummary()

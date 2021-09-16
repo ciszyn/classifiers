@@ -3,7 +3,7 @@ import pandas as pd
 from math import sqrt
 from scipy.stats import t
 import statistics
-from plot_histograms import plot
+from tools.plot_histograms import plot
 from votingConfig import *
 from variables import set_size
 
@@ -34,7 +34,7 @@ def extractVoting():
     for optimizationMethod in optimizationMethods:
         for votingMethod in votingMethods:
             try:
-                dict = load('./votingVars/' + votingMethod +
+                dict = load('./votingVars/savedResults/' + votingMethod +
                             '_' + optimizationMethod + '.joblib')
                 df = pd.DataFrame(
                     columns=["commity", "val_acc_1", "val_acc_2", "test_acc_1", "test_acc_2"])
@@ -51,9 +51,9 @@ def extractVoting():
                 df.at[0, "p_value"] = 2 * (1 - t.cdf(t_value, count-1)) * 100
                 df.at[0, "max_accuracy"] = max(df['test_acc_2'])
                 df.at[0, "max_increment"] = max(df['differences'])
-                df.to_csv('./votingVars/' + votingMethod +
+                df.to_csv('./votingVars/tables/' + votingMethod +
                           '_' + optimizationMethod + '.csv')
-                plot('./votingVars/' + votingMethod +
+                plot('./votingVars/plots/' + votingMethod +
                      '_' + optimizationMethod + '.csv')
             except:
                 continue
